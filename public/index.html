@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculo de presupuesto</title>
+    
+    <!-- Enlace de los iconos utilizados de la app -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- ----------------------------------------- -->
+    <!-- Estilos de la app -->
+    <link rel="stylesheet" href="./css/normalize.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <!-- ----------------- -->
+    <!-- Enlace de la imagen del icono de la app -->
+    <link rel="icon" href="./img/budgcalc.png">
+</head>
+
+<body class="dark">
+    <!-- Contenedor la cabecera con los botones de la app -->
+    <header class="header">
+        <!-- Contiene los botones del header -->
+        <div class="container header__buttons">
+            <p class="header__user" id="userLogedHtml"></p>
+            <!-- Select para el tema de la app (light - dark) -->
+            <select name="inptTheme" id="inptTheme" class="pref__input">
+                <option value="dark">
+                    dark
+                </option>
+                <option value="light">
+                    light
+                </option>
+            </select>
+            <!-- Botones de funcionalidad y navegacion -->
+            <button class="form__button form__button--header d-none" id="btnNewBudg">Nuevo presupuesto</button>
+            <a class="form__button form__button--header form__button--header-link d-none" id="btnShowPrevBudgts" href="tablero.html">
+                Todos los años
+            </a>
+            <button class="form__button form__button--header" id="btnShowPopupLogin">Iniciar sesión</button>
+            <button class="form__button form__button--header d-none" id="btnLogout">Cerrar sesión</button>
+        </div>
+        <!-- ------------------------------- -->
+    </header>
+    <!-- ------------------------------------------------ -->
+
+    <!-- Contenedor del balance financiero anual y del formulario para agregar un inoutcome -->
+    <container class="container flex-container">
+        <!-- Contenedor del balance financiero del año -->
+        <div class="balance">
+            <div class="balance__group">
+                <p>
+                    Presupuesto anual:
+                </p>
+                <p class="balance__amount emphasis" id="anualBudg">
+                    HNL 0.00
+                </p>
+            </div>
+            <div class="balance__group">
+                <p>
+                    Ingreso anual:
+                </p>
+                <p class="balance__amount emphasis" id="anualIncms">
+                    HNL 0.00
+                </p>
+            </div>
+            <div class="balance__group">
+                <p>
+                    Egreso anual:
+                </p>
+                <p class="balance__amount emphasis">
+                    <span id="anualOutcms">HNL 0.00</span>
+                    <span id="outcmsPrcntg">0%</span>
+                </p>
+            </div>
+        </div>
+        <!-- ----------------------------------------- -->
+
+        <!-- Formulario para agregar un nuevo inoutcome -->
+        <form class="form formadd" id="frmAdd">
+            <div class="form__group">
+                <label for="inptType" class="form__label">
+                    Seleccione el tipo:
+                </label>
+                <select class="form__input" name="inptType" id="inptType">
+                    <option value="ingreso" selected>Ingreso</option>
+                    <option value="egreso">Egreso</option>
+                </select>
+            </div>
+            <div class="form__group">
+                <label for="inptId" class="form__label">
+                    Identificador:
+                </label>
+                <input type="text" class="form__input" id="inptId" name="inptId" maxlength="33"
+                    placeholder="pago del agua" onclick="select()" autofocus spellcheck="false" autocomplete="off" >
+            </div>
+            <div class="form__group">
+                <label for="inptDesc" class="form__label">
+                    Descripcion:
+                </label>
+                <textarea class="form__input" name="inptDesc" id="inptDesc" maxlength="115"
+                    placeholder="pago realizado 5 dias antes de la fecha limite" onclick="select()" spellcheck="false" autocomplete="off"
+                    ></textarea>
+            </div>
+            <div class="form__group">
+                <label for="inptAmount" class="form__label">
+                    Monto:
+                </label>
+                <input class="form__input" type="number" name="inptAmount" id="inptAmount"
+                    min="1" placeholder="2500" onclick="select()" spellcheck="false" autocomplete="off" >
+            </div>
+            <div class="form__group">
+                <label for="inptDate" class="form__label">
+                    Fecha del monto:
+                </label>
+                <input class="form__input" type="date" name="inptDate" id="inptDate" >
+            </div>
+            <div class="form__group d-none">
+                <label for="inptRepeat" class="form__label">
+                    Repetir cada:
+                </label>
+                <select class="form__input" name="inptRepeat" id="inptRepeat" required>
+                    <option value="nunca" selected>Nunca</option>
+                    <optgroup label="Cantidad de meses">
+                        <option value="1">Uno</option>
+                        <option value="2">Dos</option>
+                        <option value="3">Tres</option>
+                        <option value="4">Cuatro</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="form__group d-none">
+                <label for="inptFile" class="form__label">
+                    Sube una factura u otro archivo como imagen o pdf (Opcional):
+                </label>
+                <input class="form__input" type="file" multiple accept="image/*, .pdf" name="inptFile" id="inptFile">
+            </div>
+            <div class="form__group">
+                <p class="form__msg" id="frmAddMsg">
+                </p>
+                <input type="submit" value="Agregar" class="form__button">
+            </div>
+        </form>
+        <!-- ------------------------------------------ -->
+    </container>
+    <!-- ---------------------------------------------------------------------------------- -->
+
+    <!-- Contenedor del cuerpo de la app -->
+    <main class="container">
+        <!-- Contenedor de los filtradores de la app (busqueda y por mes) -->
+        <div class="filter">
+            <p class="date"></p>
+            <div class="filter__option">
+                <label class="filter__label" for="inptFltrByMnth">Filtrar meses por:</label>
+                <select class="filter__input" name="inptFltrByMnth" id="inptFltrByMnth">
+                    <option value="todos" selected>
+                        Todos
+                    </option>
+                    <option value="actual">
+                        Actual
+                    </option>
+                    <optgroup label="Nombre">
+                        <option value="enero">
+                            Enero
+                        </option>
+                        <option value="febrero">
+                            Febrero
+                        </option>
+                        <option value="marzo">
+                            Marzo
+                        </option>
+                        <option value="abril">
+                            Abril
+                        </option>
+                        <option value="mayo">
+                            Mayo
+                        </option>
+                        <option value="junio">
+                            Junio
+                        </option>
+                        <option value="julio">
+                            Julio
+                        </option>
+                        <option value="agosto">
+                            Agosto
+                        </option>
+                        <option value="septiembre">
+                            Septiembre
+                        </option>
+                        <option value="octubre">
+                            Octubre
+                        </option>
+                        <option value="noviembre">
+                            Noviembre
+                        </option>
+                        <option value="diciembre">
+                            Diciembre
+                        </option>
+                    </optgroup>
+                </select>
+            </div>
+            <form class="filter__option formsearch" id="frmSearch">
+                <label class="filter__label" for="inptFltrSrch">Buscar:</label>
+                <div class="form__group">
+                    <input class="filter__input" type="search" name="inptFltrSrch" id="inptFltrSrch"
+                        placeholder="Ej.: agua" autocomplete="off">
+                        <button class="form__button"><span class="material-icons">search</span></button>
+                </div>
+            </form>
+        </div>
+        <!-- ------------------------------------------------------------ -->
+
+        <!-- Contenedor de todos los meses con su balance financiero -->
+        <div class="months" id="cntMonths">
+            <details class="month" id="enero">
+                <summary class="month__title">
+                    <p>
+                        Enero
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Enero">
+                    <!-- <div class="inoutcome">
+                        <header class="inoutcome__header">
+                            <p class="emphasis">
+                                HNL 0.00
+                            </p>
+                            <div class="income__buttons">
+                                <button class="fa fa-pen"></button>
+                                <button class="fa fa-trash"></button>
+                            </div>
+                        </header>
+                        <details class="inoutcome__more">
+                            <summary class="inoutcome__id">
+                                <p>
+                                    Pago del agua
+                                </p>
+                                <i class="fa fa-info-circle"></i>
+                            </summary>
+                            <div class="inoutcome__details">
+                                <p class="inoutcome__description">
+                                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. In nulla incidunt maiores consequuntur, fugit distinctio!
+                                </p>
+                                <p class="inoutcome__date">
+                                    24/12/21
+                                </p>
+                            </div>
+                        </details>
+                    </div> -->
+                </div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="febrero">
+                <summary class="month__title">
+                    <p>
+                        Febrero
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Febrero"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="marzo">
+                <summary class="month__title">
+                    <p>
+                        Marzo
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Marzo"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="abril">
+                <summary class="month__title">
+                    <p>
+                        Abril
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Abril"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="mayo">
+                <summary class="month__title">
+                    <p>
+                        Mayo
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Mayo"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="junio">
+                <summary class="month__title">
+                    <p>
+                        Junio
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Junio"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="julio">
+                <summary class="month__title">
+                    <p>
+                        Julio
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Julio"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="agosto">
+                <summary class="month__title">
+                    <p>
+                        Agosto
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Agosto"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="septiembre">
+                <summary class="month__title">
+                    <p>
+                        Septiembre
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Septiembre"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="octubre">
+                <summary class="month__title">
+                    <p>
+                        Octubre
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Octubre"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="noviembre">
+                <summary class="month__title">
+                    <p>
+                        Noviembre
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Noviembre"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+            <details class="month" id="diciembre">
+                <summary class="month__title">
+                    <p>
+                        Diciembre
+                    </p>
+                    <span class="material-icons">keyboard_arrow_down</span>
+                </summary>
+                <div class="month__inoutcomes Diciembre"></div>
+                <div class="month__balance">
+                    <div class="month__group">
+                        <p>
+                            Presupuesto mensual
+                        </p>
+                        <p class="month__amount month__amount--budget emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Ingreso mensual
+                        </p>
+                        <p class="month__amount month__amount--income emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                    <div class="month__group">
+                        <p>
+                            Egreso mensual
+                        </p>
+                        <p class="month__amount month__amount--outcome emphasis">
+                            HNL 0.00
+                        </p>
+                    </div>
+                </div>
+            </details>
+        </div>
+        <!-- ------------------------------------------------------------ -->
+    </main>
+    <!-- ------------------------------- -->
+
+    <!-- Contenedor del popup para editar un inoutcome -->
+    <div class="popup d-none">
+        <form class="form formedit" id="frmEdit" spellcheck="false" autocomplete="false">
+            <div class="form__group--icon">
+                <span class="material-icons form__icon-close" onclick="this.parentElement.parentElement.parentElement.classList.add('d-none')">close</span>
+            </div>
+            <div class="form__group">
+                <label for="inptNewType" class="form__label">
+                    Seleccione el nuevo tipo:
+                </label>
+                <select class="form__input" name="inptNewType" id="inptNewType" required>
+                    <option value="ingreso">Ingreso</option>
+                    <option value="egreso">Egreso</option>
+                </select>
+            </div>
+            <div class="form__group">
+                <label for="inptNewId" class="form__label">
+                    Nuevo identificador:
+                </label>
+                <input type="text" class="form__input" id="inptNewId" name="inptNewId"
+                    maxlength="33" onclick="select()" required>
+            </div>
+            <div class="form__group">
+                <label for="inptNewDesc" class="form__label">
+                    Nueva descripcion:
+                </label>
+                <textarea class="form__input" name="inptNewDesc" id="inptNewDesc"
+                    maxlength="115" onclick="select()" required></textarea>
+            </div>
+            <div class="form__group">
+                <label for="inptNewAmount" class="form__label">
+                    Nuevo monto:
+                </label>
+                <input class="form__input" type="number" name="inptNewAmount" id="inptNewAmount"
+                    min="1" onclick="select()" required>
+            </div>
+            <div class="form__group">
+                <p class="form__msg" id="formeditMsg"></p>
+                <input type="submit" value="Actualizar" class="form__button">
+            </div>
+        </form>
+    </div>
+    <!-- --------------------------------------------- -->
+
+    <!-- Popup para mostrar los archivos (pdf o imagenes) del inoutcome -->
+    <div class="popup d-none" id="docsPopup">
+        <div class="docs">
+            <div class="docs__btns">
+                <span class="material-icons docs__btn d-none" id="docsGoBack">west</span>
+                <span class="material-icons docs__btn docs__btn--close" onclick="this.parentElement.parentElement.parentElement.classList.add('d-none')">close</span>
+            </div>
+            <div class="docs__files" id="docsBtns">
+            </div>
+            <div class="docs__viewer" id="docsViewer"></div>
+        </div>
+    </div>
+    <!-- -------------------------------------------------------------- -->
+
+    <!-- Popup para el inicio de sesion del usuario -->
+    <div class="popup d-none" id="loginPopup">
+        <form class="login form" id="frmLogin">
+            <div class="form__group form__group--icon">
+                <span class="material-icons form__icon-close" onclick="this.parentElement.parentElement.parentElement.classList.add('d-none')">close</span>
+            </div>
+            <div class="form__group">
+                <label class="form__label" for="inptMail">Ingresa tu correo: </label>
+                <input class="form__input" type="email" id="inptMail" onclick="select()" spellcheck="false" autocomplete="off" required>
+            </div>
+            <div class="form__group">
+                <label class="form__label" for="inptPaswrd">Ingresa tu contraseña: </label>
+                <input class="form__input" type="password" id="inptPaswrd" onclick="select()" spellcheck="false" autocomplete="off" required>
+            </div>
+            <div class="form__group">
+                <p class="form__msg" id="frmLoginMsg">
+                </p>
+                <input type="submit" value="Iniciar sesión" class="form__button">
+            </div>
+            <a class="form__link" href="">Registrate</a>
+        </form>
+    </div>
+    <!-- ------------------------------------------ -->
+
+    <!-- Modal con boton opcional para mostrar mensajes -->
+    <div class="modal-cnt d-none" id="modalCnt">
+        <div class="modal">
+            <div class="form__group--icon">
+                <span class="material-icons form__icon-close" onclick="this.parentElement.parentElement.parentElement.classList.add('d-none')">close</span>
+            </div>
+            <div class="modal__info" id="modalInfo">
+            </div>
+        </div>
+    </div>
+    <!-- ---------------------------------------------- -->
+</body>
+<script src="./js/app.js" type="module" defer></script>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos los años</title>
+
+    <!-- Enlace de los iconos utilizados de la app -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- ----------------------------------------- -->
+    <!-- Estilos de la app -->
+    <link rel="stylesheet" href="./css/normalize.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <!-- ----------------- -->
+    <!-- Enlace de la imagen del icono de la app -->
+    <link rel="icon" href="./img/budgcalc.png">
+</head>
+<body class="dark">
+    <!-- Cabecera para mostrar el usuario y un input para cambiar el tema de la app -->
+    <header class="header">
+        <div class="container header__buttons">
+            <!-- Parrafo para mostrar el correo del usuario -->
+            <p class="header__user" id="userLogedHtml"></p>
+            <!-- Select para el tema de la app (light - dark) -->
+            <select name="inptTheme" id="inptTheme" class="pref__input">
+                <option value="dark">
+                    dark
+                </option>
+                <option value="light">
+                    light
+                </option>
+            </select>
+        </div>
+    </header>
+    <!-- -------------------------------------------------------------------------- -->
+
+    <!-- Contenedor del cuerpo del tablero -->
+    <main class="container">
+        <div class="years" id="yearsHtmlCnt">
+        </div>
+    </main>
+    <!-- --------------------------------- -->
+
+    <!-- Balance financiero de todos los anios -->
+    <footer class="container footer">
+        <div class="footer-balance">
+            <p class="footer-balance__amount"><span>Total ingresos:</span> <span id="yearsIncmHtml">HNL 0.00</span></p>
+            <p class="footer-balance__amount"><span>Total egresos:</span> <span id="yearsOutcmHtml">HNL 0.00</span></p>
+            <p class="footer-balance__amount"><span>Total presupuesto:</span> <span id="yearsBudgtHtml">HNL 0.00</span></p>
+        </div>
+    </footer>
+    <!-- ------------------------------------- -->
+</body>
+<script src="./js/dashboard.js" type="module" defer></script>
+</html>

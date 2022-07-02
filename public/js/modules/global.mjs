@@ -1,5 +1,6 @@
 import * as dbFuncs from "./db-funcs.mjs";
 import * as ioFuncs from "./io-funcs.mjs";
+import * as modal from './modal.mjs';
 
 /* Codigo relacionado con importaciones de firebase */
 let fbDataActYear; //Se define un arreglo para almacenar la informacion que se reciba de la base de datos del año actual
@@ -42,34 +43,6 @@ for (let cookie of document.cookie.split(';')) {
 /* ------------------------------------------------------------------------------ */
 
 
-/* Funcion para mostrar un modal con un boton opcional */
-const modalInfo = document.getElementById('modalInfo');
-const exeHtmlFunc = (func) => func();
-const modalBtn = (func, btnTxt) => `<button class="form__button form__button--modal" onclick="exeHtmlFunc(${func})">${btnTxt}</button>`;
-function shwModal(title, description, func, btnTxt) {
-    modalInfo.innerHTML = `
-        <h2 class="modal__title">${title}</h2>
-        <p class="modal__description">${description}</p>
-        ${arguments.length === 4 ? modalBtn(func, btnTxt) : ''}
-    `;
-    document.getElementById('modalCnt').classList.remove('d-none');
-}
-/* --------------------------------------------------- */
-
-/* Codigo para cuando se este visualizando un anio que no sea el actual */
-const selectedYear = localStorage.getItem('View') || yearToLoad; //Se intenta obtener el anio a visualizar y si no existe se establece el actual
-let otherYearView = false;
-//Si el anio a visualizar es diferente al anio actual
-if (selectedYear !== yearToLoad) {
-    const modalMsg = `Estas en el modo de visualizacion de el año <strong>${selectedYear}</strong>.<br /><br />Para volver al año actual:<br />1- Da clic en el botón "Todos los años".<br />2- Busca el año actual "${yearToLoad}" y da clic en el.`;
-    
-    shwModal('Modo de visualizacion', modalMsg);
-    setYearToLoad(selectedYear); //Se establece el anio actual como el anio a visualizar
-    otherYearView = true; //Se esstablece como verdadero a que se esta visualizando otro anio que no es el actual
-}
-/* -------------------------------------------------------------------- */
-
-
 /* Funcion para crear un id */
 const genNewId = () => {
     let ID = "";
@@ -103,6 +76,27 @@ const setFrmAddActDate = () => {
     frmAdd.inptDate.value = `${yearToLoad}-${actMnth}-${actDate}`;
 }
 /* ----------------------------------------------------- */
+
+const inptFltrByMnth = document.getElementById('inptFltrByMnth'); //Se obtiene el input para filtrar por mes
+
+/* Codigo para cuando se este visualizando un anio que no sea el actual */
+const selectedYear = localStorage.getItem('View') || yearToLoad; //Se intenta obtener el anio a visualizar y si no existe se establece el actual
+let otherYearView = false;
+//Si el anio a visualizar es diferente al anio actual
+if (selectedYear !== yearToLoad) {
+    const modalMsg = `
+        Estas en el modo de visualizacion de el año <strong>${selectedYear}</strong>.<br /><br />
+        Para volver al año actual:<br />
+        1- Da clic en el botón "Todos los años".<br />
+        2- Busca el año actual "<strong>${yearToLoad}</strong>" y da clic en el.
+    `;
+    //Se accede a las opciones del filtrador del mes
+    for (let option of inptFltrByMnth.options) if (option.value === 'actual') option.classList.add('d-none'); //Se oculta el filtrador del mes actual
+    modal.shwModal('Modo de visualizacion', modalMsg);
+    setYearToLoad(selectedYear); //Se establece el anio actual como el anio a visualizar
+    otherYearView = true; //Se esstablece como verdadero a que se esta visualizando otro anio que no es el actual
+}
+/* -------------------------------------------------------------------- */
 
 /* Al subir archivos en el input file */
 frmAdd.inptFile.addEventListener('change', () => {
@@ -139,4 +133,4 @@ const btnLogout = document.getElementById('btnLogout');
 
 const btnShowPrevBudgts = document.getElementById('btnShowPrevBudgts');
 
-export { currFrmt, rfrmtCurr, iosArr, yearToLoad, setYearToLoad, actMnth, actMnthName, actDate, otherYearView, cookies, shwModal, genNewId, frmEdit, months, frmtDate, cntMonths, docsPopup, docsGoBack, docsBtns, docsViewer, frmAdd, frmAddMsg, setFrmAddActDate, btnNewBudg, btnShowPopupLogin, loginPopup, btnLogout, btnShowPrevBudgts, frmLogin, frmLoginMsg, fbDataActYear, setFbDataActYear, userLoged, userLogedHtml, setIosArr, setUserLoged};
+export { currFrmt, rfrmtCurr, iosArr, yearToLoad, setYearToLoad, actMnth, actMnthName, actDate, otherYearView, cookies, genNewId, frmEdit, months, frmtDate, cntMonths, docsPopup, docsGoBack, docsBtns, docsViewer, frmAdd, frmAddMsg, setFrmAddActDate, inptFltrByMnth, btnNewBudg, btnShowPopupLogin, loginPopup, btnLogout, btnShowPrevBudgts, frmLogin, frmLoginMsg, fbDataActYear, setFbDataActYear, userLoged, userLogedHtml, setIosArr, setUserLoged};

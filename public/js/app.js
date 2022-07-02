@@ -1,6 +1,7 @@
 'use strict';
 
 import * as global from './modules/global.mjs';
+import * as modal from './modules/modal.mjs';
 import * as dbFuncs from './modules/db-funcs.mjs';
 import * as ioFuncs from './modules/io-funcs.mjs';
 import * as fbFuncs from './modules/fb-funcs.mjs';
@@ -121,13 +122,12 @@ global.btnNewBudg.addEventListener('click', () => {
     const msgHeader = 'Nuevo presupuesto';
     const msgBody = `¿Estas seguro que deseas archivar el presupuesto de el año pasado y comenzar uno nuevo?`;
     const msgBtnText = 'Crear nuevo';
-    global.shwModal(msgHeader, msgBody, dbFuncs.whenYearEnds, msgBtnText);
+    modal.shwModal(msgHeader, msgBody, dbFuncs.whenYearEnds, msgBtnText);
 });
 /* ------------------------------- */
 
 /* Filtrar los meses del DOM */
-const inptFltrByMnth = document.getElementById('inptFltrByMnth');
-inptFltrByMnth.addEventListener('change', () => {
+global.inptFltrByMnth.addEventListener('change', () => {
     switch (inptFltrByMnth.value) {
         case 'todos':
             ioFuncs.filterShowAll();
@@ -171,3 +171,8 @@ global.btnLogout.addEventListener('click', () => {
     loginFuncs.onLogout();
 });
 /* -------------------------------------------------------------------------------------------------- */
+
+const btnDeleteAllIos = document.getElementById('btnDeleteAllIos');
+btnDeleteAllIos.addEventListener('click', () => {
+    modal.shwModal('Eliminar el año', 'Esta seguro que desea eliminar toda la informacion de este año.', fbFuncs.deleteYear, 'Eliminar año');
+})

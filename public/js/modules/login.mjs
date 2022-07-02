@@ -2,6 +2,7 @@ import * as global from "./global.mjs";
 import * as fbFuncs from "./fb-funcs.mjs";
 import * as dbFuncs from "./db-funcs.mjs";
 import * as fbImports from "./fb-imports.mjs";
+import * as modal from "./modal.mjs";
 
 
 /* Funcion para validar el correo y la contraseña al iniciar sesion */
@@ -53,12 +54,12 @@ const onLogout = () => {
     global.frmAdd.inptFile.parentElement.classList.add('d-none'); //Se oculta el contenedor del input file al iniciar sesion
 
     global.userLogedHtml.textContent = ''; //Se borra el usuario que tenia la sesion iniciada
-
+    
     if (global.iosArr.length === 0) return; //Si el arreglo con los ios esta vacio no se hace nada
 
     /* Si se agregaron ios con la sesion iniciada */
     const modalDesc = 'Inicia sesión para acceder a tu información nuevamente.';
-    global.shwModal('Almacenamiento de información', modalDesc);
+    modal.shwModal('Almacenamiento de información', modalDesc);
     dbFuncs.deleteAllIos(); //Se eliminan todos los ios de la interfaz y del arreglo y se almacena en el almacenamiento local
     /* ------------------------------------------ */
 }

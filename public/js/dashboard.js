@@ -1,5 +1,9 @@
 import * as fbImports from './modules/fb-imports.mjs';
+import * as modal from './modules/modal.mjs';
 import * as theme from './modules/theme.mjs';
+
+const exeHtmlFunc = (func) => func();
+const modalBtn = (func, btnTxt) => `<button class="form__button form__button--modal" onclick="exeHtmlFunc(${func})">${btnTxt}</button>`;
 
 //Instancia para dar formato de moneda
 const currFrmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'HNL' });
@@ -12,6 +16,18 @@ const userLogedHtml = document.getElementById('userLogedHtml'); //Se obtiene el 
 userLogedHtml.textContent = userLoged.email; //Se muestra el correo del usuario en la cabecera de la pagina
 
 const yearsData = []; //Arreglo para almacenar los objetos con la informacion de los anios
+
+/* Funcion para agregar un presupuesto en el anio anterior al primero del que se tiene un presupuesto */
+const btnAddNewYear = document.getElementById('btnAddNewYear');
+btnAddNewYear.addEventListener('click', () => {
+    const firstYear = Number(yearsData[0].year); //Se obtiene el primer anio del que se tiene presupuesto
+    const yearToAdd = firstYear - 1; //Se obtiene el anio a añadir, es decir, un anio menos que el primero (Ej.: 2022 - 1 = 2021)
+    localStorage.setItem('inoutcomes', JSON.stringify([])); //Se vacia el arreglo con los ios
+    localStorage.setItem('View', yearToAdd); //Se establece el anio a visualizar como el anio agregado
+    open('index.html', '_self'); //Se abre la pagina del index
+});
+/* -------------------------------------------------------------------------------------------------- */
+
 
 const actYear = new Date().getFullYear().toString(); //Se obtiene el anio actual
 
@@ -77,16 +93,18 @@ const showAllYearsBalance = () => {
 /* Funcion para obtener todos los documentos de la coleccion del usuario */
 const getFbDocs = async () => {
     const docs = await fbImports.getDocs(fbImports.collection(fbImports.fbDB, userLoged.uid)).catch(() => {
-        console.error('ocurrio un error al leer los documentos de la base de datos');
-    })
+        modal.shwModal('Error al leer la base de datos', 'Ocurrio un error al leer los documentos de la base de datos.');
+    });
     docs.forEach(doc => {
         const year = doc.id;
         calcYearBalance(year, doc.data().data);
-    })
+    });
 
     showAllYearsBalance();
+    btnAddNewYear.classList.remove('d-none'); //Se muestra el boton para gregar presupuesto en un anio anterior
 }
 /* ---------------------------------------------------------------------- */
+
 window.onload = () => { //Cuando cargue el documento
     getFbDocs(); //Se llama la funcion para cargar los anios de firebase
 }

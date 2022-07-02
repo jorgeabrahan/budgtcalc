@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.3/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.8.3/firebase-auth.js";
-import { getFirestore, collection, getDoc, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/9.8.3/firebase-firestore.js";
+import { getFirestore, collection, getDoc, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.8.3/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, listAll, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.8.3/firebase-storage.js";
 
 const firebaseConfig = {
@@ -16,4 +16,4 @@ const fbAuth = getAuth();
 const fbStorage = getStorage(fbApp);
 const fbDB = getFirestore(fbApp);
 
-export { fbApp, fbAuth, fbDB, fbStorage, ref, uploadBytes, listAll, getDownloadURL, deleteObject, collection, getDocs, getDoc, setDoc, doc, signInWithEmailAndPassword };
+export { fbApp, fbAuth, fbDB, fbStorage, ref, uploadBytes, listAll, getDownloadURL, deleteObject, collection, getDocs, getDoc, setDoc, doc, deleteDoc, signInWithEmailAndPassword };

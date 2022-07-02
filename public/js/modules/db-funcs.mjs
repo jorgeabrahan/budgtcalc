@@ -4,6 +4,7 @@ import * as global from './global.mjs';
 import * as ioFuncs from './io-funcs.mjs';
 import * as fbFuncs from './fb-funcs.mjs';
 import * as loginFuncs from './login.mjs';
+import * as modal from './modal.mjs';
 
 /* Para cuando sea un nuevo anio */
 const ifNewYear = year => {
@@ -14,7 +15,7 @@ const ifNewYear = year => {
     global.btnNewBudg.classList.remove('d-none');//Se muestra el boton para un nuevo presupuesto
     const msgHeader = '¡El año ha terminado!';
     const msgBody = `Para comenzar un nuevo presupuesto de este año da clic en el boton "nuevo presupuesto" en la parte superior de la página.`;
-    global.shwModal(msgHeader, msgBody);
+    modal.shwModal(msgHeader, msgBody);
 }
 
 const getYearFromLS = () => {
@@ -93,7 +94,7 @@ const deleteIo = (id, delJustFromUI) => {
     if (!delJustFromUI) { //Si ademas de eliminarlo de la interfaz se quiere eliminar en el arreglo
         removeIoFromArr(getIoIndxFromArr(id)); //Se elimina del arreglo
         //Si tiene la sesion iniciada y el io tenia archivos
-        if (global.userLoged && io.files.length > 0) fbFuncs.deleteFilesFromStorage(io); //Se eliminan los archivos del almacenamiento local
+        if (global.userLoged && io.files.length > 0) fbFuncs.deleteFilesFromStorage(io); //Se eliminan los archivos de la base de datos
         onChangeOfArr(io.month);
     }
 }
@@ -194,7 +195,7 @@ const whenYearEnds = () => {
     const actYear = new Date().getFullYear().toString(); //Se obtiene el anio actual
     localStorage.setItem('year', actYear); //Se establece el anio actual en el almacenamiento local
     global.setYearToLoad(actYear); //Se establece el anio a cargar como el anio actual
-    modalCnt.classList.add('d-none'); //Se oculta el modal que mostro el mensaje del nuevo presupuesto
+    modal.modalCnt.classList.add('d-none'); //Se oculta el modal que mostro el mensaje del nuevo presupuesto
 }
 /* ---------------------------------------------- */
 

@@ -461,12 +461,8 @@ embed {
         width: max-content;
     }
     .month__inoutcomes {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     }
-}
-
-.d-none {
-    display: none;
 }
 
 
@@ -486,6 +482,14 @@ embed {
 
     cursor: pointer;
     transition: transform 200ms ease;
+}
+.year-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.year-add span {
+    font-size: 6em;
 }
 .year:hover {
     transform: scale(1.02);
@@ -516,4 +520,10 @@ embed {
     font-weight: bold;
     line-height: 1.5em;
     font-size: 1.2em;
+}
+
+
+
+.d-none {
+    display: none;
 }

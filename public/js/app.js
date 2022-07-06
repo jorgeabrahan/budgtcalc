@@ -21,6 +21,14 @@ else { //Si se esta visualizando el anio actual
 }
 /* ----------------------------------------------------- */
 
+
+/* Funcion a ejecutar cuando se agregue un io y despues de que se suban los archivos */
+const saveAndLoadIo = (io) => {
+    global.iosArr.push(io); //Se guarda el io en el arreglo
+    dbFuncs.newIo(io); //Se crea el io en la interfaz
+}
+/* --------------------------------------------------------------------------------- */
+
 /* Al agregar un inoutcome */
 global.frmAdd.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -33,8 +41,15 @@ global.frmAdd.addEventListener('submit', async (e) => {
         return;
     }
 
-    if (ioFuncs.maxFileSizeReached()) { //Si se sobrepasa el peso maximo de los archivos
-        frmAddMsg.textContent = 'El peso de los archivos sobrepasa los 1.5MB, intente comprimiendolos o subiendo otros archivos.';
+    //Si se sobrepasa el peso maximo de los archivos
+    if (ioFuncs.maxFileSizeReached(global.frmAdd.inptFile.files)) {
+        global.frmAddMsg.textContent = 'El peso de los archivos sobrepasa los 1.5MB, intente comprimiendolos o subiendo otros archivos.';
+        return;
+    }
+
+    //Si se excede la cantidad maxima de archivos por cada monto
+    if (global.frmAdd.inptFile.files.length > 10) {
+        global.frmAddMsg.textContent = 'Se ha sobrepasado la cantidad maxima de archivos permitida por cada monto (10).';
         return;
     }
 
@@ -66,7 +81,7 @@ global.frmAdd.addEventListener('submit', async (e) => {
         global.frmAddMsg.textContent = 'Espere mientras se suben los archivos a la base de datos.';
         await fbFuncs.saveIoFilesOnStorage(io.id, global.frmAdd.inptFile.files) //Se almacenan los archivos en el storage
         //Se obtiene los archivos del storage, se almacenan en el arr de files y se guardan los cambios en el arreglo y la interfaz
-        fbFuncs.getSrcFilesFromStorage(io);
+        fbFuncs.getSrcFilesFromStorage(io, saveAndLoadIo);
         global.frmAddMsg.textContent = '';
     } else { //Si el io no tiene archivos
         global.iosArr.push(io); //Se guarda el io en el arreglo
@@ -89,30 +104,53 @@ global.frmAdd.addEventListener('submit', async (e) => {
 });
 /* ----------------------- */
 
-/* Al editar un inoutcome */
-const formeditMsg = document.getElementById('formeditMsg');
-global.frmEdit.addEventListener('submit', e => {
-    e.preventDefault();
-    /* Si hay inputs vacios */
-    formeditMsg.textContent = '';
-    for (let inpt of global.frmEdit) {
-        if (inpt.value !== '') continue;
-        formeditMsg.textContent = 'Llena todos los campos';
-        return;
-    }
-    /* -------------------- */
-
-    const prevIoData = dbFuncs.getIoFromArr(global.frmEdit.getAttribute('key-edit'));
-
-    const io = {
-        ...prevIoData,
+/* Funcion a ejecutar una vez se pasen todos los filtros del formulario para editar io */
+const createIoEdited = (io) => {
+    const ioEdited = {
+        ...io,
+        files: io.files,
         type: global.frmEdit.inptNewType.value,
         name: global.frmEdit.inptNewId.value,
         id: global.frmEdit.getAttribute('key-edit'),
         description: global.frmEdit.inptNewDesc.value,
-        amount: Number(global.frmEdit.inptNewAmount.value),
+        amount: Number(global.frmEdit.inptNewAmount.value)
     }
-    dbFuncs.editIo(io);
+    dbFuncs.editIo(ioEdited);
+    //Se vuelven a habilitar los eventos del formulario de edicion
+    global.frmEdit.style.pointerEvents = 'all';
+}
+/* ----------------------------------------------------------------------------------- */
+
+/* Al editar un inoutcome */
+global.frmEdit.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    /* Si hay inputs vacios */
+    global.frmEditMsg.textContent = '';
+    for (let inpt of global.frmEdit) {
+        if (inpt.id === 'inptDeleteFile' || inpt.id === 'inptAddFiles' || inpt.id === 'btnDeleteFile') continue;
+        if (inpt.value !== '') continue;
+        global.frmEditMsg.textContent = 'Llena todos los campos';
+        return;
+    }
+    /* -------------------- */
+
+    //Se quitan los eventos del formulario de edicion
+    e.target.style.pointerEvents = 'none';
+
+    const prevIoData = dbFuncs.getIoFromArr(global.frmEdit.getAttribute('key-edit'));
+
+    //Si agrego archivos al io
+    if (global.frmEdit.inptAddFiles.files.length) {
+        if (global.checkInptAddFilesOnEdit()) return; //Si se excede el maximo de 10 archivos o el peso maximo de 1.5MB no se edita el io
+        global.frmEditMsg.textContent = 'Espere mientras se suben los archivos a la base de datos.';
+        //Se suben los nuevos archivos a la base de datos
+        await fbFuncs.saveIoFilesOnStorage(prevIoData.id, global.frmEdit.inptAddFiles.files);
+        //Se obtienen los archivos del io
+        fbFuncs.getSrcFilesFromStorage(prevIoData, createIoEdited);
+        return;
+    }
+
+    createIoEdited(prevIoData);
 });
 
 

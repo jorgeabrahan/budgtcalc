@@ -1,4 +1,5 @@
 import * as dbFuncs from "./db-funcs.mjs";
+import * as fbFuncs from "./fb-funcs.mjs";
 import * as ioFuncs from "./io-funcs.mjs";
 import * as modal from './modal.mjs';
 
@@ -53,6 +54,7 @@ const genNewId = () => {
 /* ------------------------- */
 
 const frmEdit = document.getElementById('frmEdit'); //Formulario para editar un io
+const frmEditMsg = document.getElementById('frmEditMsg'); //Mensaje del formulario para editar
 
 const cntMonths = document.getElementById('cntMonths'); //Contenedor de los meses en el DOM
 
@@ -100,7 +102,7 @@ if (selectedYear !== yearToLoad) {
 
 /* Al subir archivos en el input file */
 frmAdd.inptFile.addEventListener('change', () => {
-    if (ioFuncs.maxFileSizeReached()) frmAddMsg.innerText = 'El peso de los archivos sobrepasa los 2MB, intente comprimiendolos o subiendo otros archivos.';
+    if (ioFuncs.maxFileSizeReached(frmAdd.inptFile.files)) frmAddMsg.innerText = 'El peso de los archivos sobrepasa los 2MB, intente comprimiendolos o subiendo otros archivos.';
     else frmAddMsg.innerText = '';
 })
 /* ---------------------------------- */
@@ -133,4 +135,91 @@ const btnLogout = document.getElementById('btnLogout');
 
 const btnShowPrevBudgts = document.getElementById('btnShowPrevBudgts');
 
-export { currFrmt, rfrmtCurr, iosArr, yearToLoad, setYearToLoad, actMnth, actMnthName, actDate, otherYearView, cookies, genNewId, frmEdit, months, frmtDate, cntMonths, docsPopup, docsGoBack, docsBtns, docsViewer, frmAdd, frmAddMsg, setFrmAddActDate, inptFltrByMnth, btnNewBudg, btnShowPopupLogin, loginPopup, btnLogout, btnShowPrevBudgts, frmLogin, frmLoginMsg, fbDataActYear, setFbDataActYear, userLoged, userLogedHtml, setIosArr, setUserLoged};
+/* Funcion para revisar el input para agregar archivos al editar un io */
+const checkInptAddFilesOnEdit = () => {
+    //Se limpia el mensaje del formulario para editar
+    frmEditMsg.textContent = '';
+    /* Se llama funcion para verificar que no se sobrepase el peso maximo */
+    if (ioFuncs.maxFileSizeReached(inptAddFiles.files)) {
+        frmEditMsg.textContent = 'El peso de los archivos sobrepasa los 1.5MB, intente comprimiendolos o subiendo otros archivos.';
+        return true;
+    }
+    /* Se suman los archivos que se agregaron con los que ya tenia el io */
+    const ioFiles = dbFuncs.getIoFromArr(frmEdit.getAttribute('key-edit')).files;
+    const totalFiles = frmEdit.inptAddFiles.files.length + ioFiles.length;
+    //Si se han agregado mas de 10 archivos
+    if (totalFiles > 10) { 
+        frmEditMsg.textContent = 'Se ha excedido la cantidad maxima de archivos para cada monto. Debes agregar menos de 10 en total.';
+        return true;
+    }
+
+    //Se verifica que el nombre de alguno de los archivos subidos no exista ya en la base de datos
+    for (let file of ioFiles) { //Por cada archivo que ya tiene el io
+        for (let newFile of frmEdit.inptAddFiles.files) { //Por cada nuevo archivo a subir
+            if (file.name === newFile.name) { //Si se encuentra un archivo con el mismo nombre
+                frmEditMsg.textContent = `Ya existe un archivo con el nombre ${file.name} para este monto, prueba a cambiar el nombre en caso de que sea un archivo diferente.`;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+/* ------------------------------------------------------------------- */
+
+/* Input para agregar archivos al editar un io */
+frmEdit.inptAddFiles.addEventListener('change', () => {
+    checkInptAddFilesOnEdit();
+});
+/* ------------------------------------------- */
+
+/* Boton para eliminar archivos del io cuando se esta editando */
+const btnDeleteFile = document.getElementById('btnDeleteFile');
+const afterDeletingFileFromStorage = (io, fileName) => {
+    dbFuncs.deleteFileFromIo(io, fileName); //Se llama una funcion para eliminar el archivo del arreglo de archivos
+    
+    //Se muestra mensaje de exito por 4 segundos
+    frmEditMsg.textContent = `El archivo ${fileName} se elimino exitosamente.`;
+    setTimeout(() => {
+        frmEditMsg.textContent = '';
+        //Se establecen los eventos al input y al boton de nuevo
+        frmEdit.inptDeleteFile.style.pointerEvents = 'all';
+        btnDeleteFile.style.pointerEvents = 'all';
+    }, 5000);
+    
+    //Se elimina la opcion del archivo del select
+    for (let opt of frmEdit.inptDeleteFile.options) if (opt.value === fileName) opt.remove();
+
+    //Si se eliminaron todos los archivos del io
+    if (io.files.length === 0) {
+        const ioHtmlCnt = document.getElementById(io.id);
+        const ioHeaderHtml = ioHtmlCnt.querySelector('.inoutcome__header');
+        const ioButtons = ioHeaderHtml.querySelector('.income__buttons'); //Se obtienen los botones del header del io
+        const ioFileBtn = ioButtons.querySelector('.file-btn'); //Se obtiene el boton de los archivos
+        //Si existe
+        if (ioFileBtn) ioFileBtn.remove(); //Se elimina
+
+        //Se oculta el contenedor del input para eliminar archivos
+        frmEdit.inptDeleteFile.parentElement.classList.add('d-none');
+        //Se oculta el boton para eliminar archivos
+        btnDeleteFile.classList.add('d-none');
+    }
+}
+
+btnDeleteFile.addEventListener('click', () => {
+    //Se obtiene el io que contiene el archivo a eliminar
+    const io = dbFuncs.getIoFromArr(frmEdit.getAttribute('key-edit'));
+    const fileNameToDelete = frmEdit.inptDeleteFile.value; 
+    //Se quitan los eventos al input para seleccionar un elemento para eliminar y el boton para eliminar archivos
+    frmEdit.inptDeleteFile.style.pointerEvents = 'none';
+    btnDeleteFile.style.pointerEvents = 'none';
+
+    //Al eliminar un archivo si ya no quedan documentos tengo que uqitar el boton para previsualizar documentos de la interfaz del monto
+
+    frmEditMsg.textContent = `Espere mientras se elimina el archivo ${fileNameToDelete} de la base de datos.`;
+    //Se llama una funcion para eliminar el archivo de la base de datos
+    fbFuncs.deleteFileFromStorage(io, fileNameToDelete, afterDeletingFileFromStorage);    
+});
+/* ----------------------------------------------------------- */
+
+
+export { currFrmt, rfrmtCurr, iosArr, yearToLoad, setYearToLoad, actMnth, actMnthName, actDate, otherYearView, cookies, genNewId, frmEdit, frmEditMsg, checkInptAddFilesOnEdit, months, frmtDate, cntMonths, docsPopup, docsGoBack, docsBtns, docsViewer, frmAdd, frmAddMsg, setFrmAddActDate, inptFltrByMnth, btnNewBudg, btnShowPopupLogin, loginPopup, btnLogout, btnShowPrevBudgts, frmLogin, frmLoginMsg, fbDataActYear, setFbDataActYear, userLoged, userLogedHtml, setIosArr, setUserLoged, btnDeleteFile };

@@ -94,14 +94,14 @@
                     Identificador:
                 </label>
                 <input type="text" class="form__input" id="inptId" name="inptId" maxlength="33"
-                    placeholder="pago del agua" onclick="select()" autofocus spellcheck="false" autocomplete="off" >
+                    placeholder="Ej.: Pago del agua" onclick="select()" autofocus spellcheck="false" autocomplete="off" >
             </div>
             <div class="form__group">
                 <label for="inptDesc" class="form__label">
                     Descripcion:
                 </label>
-                <textarea class="form__input" name="inptDesc" id="inptDesc" maxlength="115"
-                    placeholder="pago realizado 5 dias antes de la fecha limite" onclick="select()" spellcheck="false" autocomplete="off"
+                <textarea class="form__input" name="inptDesc" id="inptDesc" maxlength="150"
+                    placeholder="Ej.: Pago realizado 5 dias antes de la fecha limite" onclick="select()" spellcheck="false" autocomplete="off"
                     ></textarea>
             </div>
             <div class="form__group">
@@ -703,9 +703,23 @@
                 <input class="form__input" type="number" name="inptNewAmount" id="inptNewAmount"
                     min="1" onclick="select()" required>
             </div>
+            <div class="form__group d-none">
+                <label for="inptAddFiles" class="form__label">
+                    Subir archivos: 
+                </label>
+                <input type="file" class="form__input" name="inptAddFiles" id="inptAddFiles" multiple accept="image/*, .pdf">
+            </div>
+            <div class="form__group d-none">
+                <label for="inptDeleteFile" class="form__label">
+                    Eliminar archivos:
+                </label>
+                <select class="form__input" name="inptDeleteFile" id="inptDeleteFile">
+                </select>
+            </div>
             <div class="form__group">
-                <p class="form__msg" id="formeditMsg"></p>
-                <input type="submit" value="Actualizar" class="form__button">
+                <p class="form__msg" id="frmEditMsg"></p>
+                <button class="form__button d-none" type="button" id="btnDeleteFile">Eliminar archivo</button>
+                <input class="form__button" type="submit" value="Actualizar">
             </div>
         </form>
     </div>

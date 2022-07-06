@@ -42,84 +42,6 @@ const onChangeOfArr = month => {
 }
 
 
-/* Se realizan los cambios de edicion en el io */
-const editIo = (io) => {
-    /* Se actualiza el objeto en la interfaz */
-    const ioHtmlCnt = document.getElementById(io.id);
-    const ioAmountHtml = ioHtmlCnt.querySelector('.inoutcome__amount');
-    const ioNameHtml = ioHtmlCnt.querySelector('.inoutcome__name');
-    const ioDescHtml = ioHtmlCnt.querySelector('.inoutcome__description');
-    const ioDateHtml = ioHtmlCnt.querySelector('.inoutcome__date');
-    const ioHeaderHtml = ioHtmlCnt.querySelector('.inoutcome__header');
-
-    ioAmountHtml.textContent = global.currFrmt.format(io.amount);
-    ioNameHtml.textContent = io.name;
-    ioDescHtml.textContent = io.description;
-    ioDateHtml.textContent = io.date;
-    ioHeaderHtml.className = `inoutcome__header inoutcome__header--${io.type} ${io.type}`;
-    /* --------------------------------------- */
-
-    /* Se actualiza el arreglo */
-    global.iosArr[getIoIndxFromArr(io.id)] = { ...io };
-    /* Se guardan los cambios */
-    onChangeOfArr(io.month);
-    /* ----------------------- */
-    global.frmEdit.parentElement.classList.add('d-none');
-}
-/* ------------------------------------------- */
-
-/* Se muestra el formulario para editar */
-const shwEditFrm = io => {
-    global.frmEdit.parentElement.classList.remove('d-none');//Se muestra el formulario
-    //Se establece la fecha y el id como atributo del formulario de edicion
-    global.frmEdit.setAttribute('key-edit', io.id);
-
-    for (let option of global.frmEdit.inptNewType) {
-        option.removeAttribute('selected', '');
-        if (option.value === io.type) option.setAttribute('selected', ''); //Se selecciona de las opciones si es ingreso o egreso
-    }
-
-    // Se rellena el formulario con los valores actuales
-    global.frmEdit.inptNewType.value = io.type;
-    global.frmEdit.inptNewId.value = io.name;
-    global.frmEdit.inptNewDesc.value = io.description;
-    global.frmEdit.inptNewAmount.value = io.amount;
-}
-/* ------------------------------------ */
-
-/* Al eliminar un inoutcome */
-const deleteIo = (id, delJustFromUI) => {
-    const io = getIoFromArr(id);
-    document.getElementById(id).remove(); //Se elimina el elemento de la interfaz
-    if (!delJustFromUI) { //Si ademas de eliminarlo de la interfaz se quiere eliminar en el arreglo
-        removeIoFromArr(getIoIndxFromArr(id)); //Se elimina del arreglo
-        //Si tiene la sesion iniciada y el io tenia archivos
-        if (global.userLoged && io.files.length > 0) fbFuncs.deleteFilesFromStorage(io); //Se eliminan los archivos de la base de datos
-        onChangeOfArr(io.month);
-    }
-}
-/* ----------------------- */
-
-/* Eliminar todos los ios */
-function deleteAllIos(delJustFromUI = true) {
-    for (let io of global.iosArr) deleteIo(io.id, delJustFromUI); //Se elimina cada io solamente de la interfaz
-    global.setIosArr([]); //Se vacía el arreglo que contiene los ios despues de haberlos eliminado de la interfaz
-    for (let month of global.months) ioFuncs.calcMonthBalance(month); //Se vuelve a calcular el balance de todos los meses
-}
-/* ---------------------- */
-
-/* Al crear un nuevo Inoutcome */
-const newIo = io => {
-    const ioMonth = document.querySelector(`.${io.month}`); //El contenedor segun el mes de los inoutcomes
-    ioMonth.appendChild(ioFuncs.createIoHtml(io));
-    onChangeOfArr(io.month);
-}
-/* --------------------------- */
-
-/* Cargar los inoutcomes del local storage */
-const loadIos = () => {for (let io of global.iosArr) newIo(io)};
-/* --------------------------------------- */
-
 const isMobile = () => window.innerWidth < 720;
 
 /* Funciones para la visualizacion de documentos */
@@ -182,11 +104,142 @@ const showDocsPrev = (io) => {
     loadDocsViewer();
     global.docsBtns.innerHTML = '';
     const filesFragment = document.createDocumentFragment();
-    // const ioFiles = ioFuncs.getParsedIoFiles(io.id); //Obtener el arreglo de archivos para este io
     for (let file of io.files) filesFragment.appendChild(createFileBtn(file));
     global.docsBtns.appendChild(filesFragment);
 }
 /* --------------------------------------------- */
+
+
+/* Se realizan los cambios de edicion en el io */
+const editIo = (io) => {
+    /* Se actualiza el objeto en la interfaz */
+    const ioHtmlCnt = document.getElementById(io.id);
+    const ioAmountHtml = ioHtmlCnt.querySelector('.inoutcome__amount');
+    const ioNameHtml = ioHtmlCnt.querySelector('.inoutcome__name');
+    const ioDescHtml = ioHtmlCnt.querySelector('.inoutcome__description');
+    const ioDateHtml = ioHtmlCnt.querySelector('.inoutcome__date');
+    const ioHeaderHtml = ioHtmlCnt.querySelector('.inoutcome__header');
+    const ioButtons = ioHeaderHtml.querySelector('.income__buttons');
+
+    //Si el io tiene archivos
+    if (io.files.length) {
+        const ioFileBtn = ioButtons.querySelector('.file-btn');
+        //Si ya tiene el boton de archivos
+        if (ioFileBtn) ioFileBtn.remove(); //Se elimina
+        //Se crea un boton para visualizar los archivos
+        const newFileBtn = document.createElement('button');
+        newFileBtn.className = 'file-btn';
+        newFileBtn.innerHTML = `<span class="material-icons">description</span>`;
+        newFileBtn.addEventListener('click', () => { showDocsPrev(io) });
+        ioButtons.prepend(newFileBtn);
+    }
+
+    ioAmountHtml.textContent = global.currFrmt.format(io.amount);
+    ioNameHtml.textContent = io.name;
+    ioDescHtml.textContent = io.description;
+    ioDateHtml.textContent = io.date;
+    ioHeaderHtml.className = `inoutcome__header inoutcome__header--${io.type} ${io.type}`;
+    /* --------------------------------------- */
+
+    /* Se actualiza el arreglo */
+    global.iosArr[getIoIndxFromArr(io.id)] = { ...io };
+    /* Se guardan los cambios */
+    onChangeOfArr(io.month);
+    /* ----------------------- */
+    global.frmEdit.parentElement.classList.add('d-none');
+}
+/* ------------------------------------------- */
+
+/* Se muestra el formulario para editar */
+const shwEditFrm = io => {
+    //Se vacia el mensaje de los errores del formulario de edicion que puede contener informacion previa
+    global.frmEditMsg.textContent = '';
+    
+    global.frmEdit.parentElement.classList.remove('d-none');//Se muestra el formulario
+    //Se establece la fecha y el id como atributo del formulario de edicion
+    global.frmEdit.setAttribute('key-edit', io.id);
+
+    for (let option of global.frmEdit.inptNewType) {
+        option.removeAttribute('selected', '');
+        if (option.value === io.type) option.setAttribute('selected', ''); //Se selecciona de las opciones si es ingreso o egreso
+    }
+
+    //Se oculta el contenedor del input para eliminar archivos
+    global.frmEdit.inptDeleteFile.parentElement.classList.add('d-none');
+    //Se limipia el input para eliminar archivos
+    global.frmEdit.inptDeleteFile.innerHTML = '';
+    //Se oculta el boton para eliminar archivos
+    global.btnDeleteFile.classList.add('d-none');
+
+    //Si el io tiene archivos
+    if (io.files.length > 0) {
+        //Se muestra el input para eliminar archivos y el boton
+        global.frmEdit.inptDeleteFile.parentElement.classList.remove('d-none');
+        global.frmEdit.inptDeleteFile.innerHTML = ''; //Se limpia el select antes de meter las opciones
+        const fileOptsFrgmnt = document.createDocumentFragment();
+        //Para cada archivo del io
+        for (let file of io.files) {
+            //Se crea una opcion para agregar en el input
+            const fileOpt = document.createElement('option');
+            fileOpt.value = file.name;
+            fileOpt.textContent = file.name;
+            fileOptsFrgmnt.appendChild(fileOpt); //Se meten todas las opciones en un document fragment
+        }
+        //Se mete el document fragment con las opciones de los archivos a eliminar en el select
+        global.frmEdit.inptDeleteFile.appendChild(fileOptsFrgmnt);
+        //Se muestra el boton para eliminar el archivo seleccionado
+        global.btnDeleteFile.classList.remove('d-none');
+    }
+
+    //Se oculta el input para subir mas archivos
+    global.frmEdit.inptAddFiles.parentElement.classList.add('d-none');
+
+    //Si tiene menos de 10 archivos subidos y tiene iniciada la sesion
+    if (io.files.length < 10 && global.userLoged) {
+        global.frmEdit.inptAddFiles.value = '';
+        global.frmEdit.inptAddFiles.parentElement.classList.remove('d-none'); //Se muestra el input para subir mas archivos
+    }
+
+    // Se rellena el formulario con los valores actuales
+    global.frmEdit.inptNewType.value = io.type;
+    global.frmEdit.inptNewId.value = io.name;
+    global.frmEdit.inptNewDesc.value = io.description;
+    global.frmEdit.inptNewAmount.value = io.amount;
+}
+/* ------------------------------------ */
+
+/* Al eliminar un inoutcome */
+const deleteIo = (id, delJustFromUI) => {
+    const io = getIoFromArr(id);
+    document.getElementById(id).remove(); //Se elimina el elemento de la interfaz
+    if (!delJustFromUI) { //Si ademas de eliminarlo de la interfaz se quiere eliminar en el arreglo
+        removeIoFromArr(getIoIndxFromArr(id)); //Se elimina del arreglo
+        //Si tiene la sesion iniciada y el io tenia archivos
+        if (global.userLoged && io.files.length > 0) fbFuncs.deleteFilesFromStorage(io); //Se eliminan los archivos de la base de datos
+        onChangeOfArr(io.month);
+    }
+}
+/* ----------------------- */
+
+/* Eliminar todos los ios */
+function deleteAllIos(delJustFromUI = true) {
+    for (let io of global.iosArr) deleteIo(io.id, delJustFromUI); //Se elimina cada io solamente de la interfaz
+    global.setIosArr([]); //Se vacía el arreglo que contiene los ios despues de haberlos eliminado de la interfaz
+    for (let month of global.months) ioFuncs.calcMonthBalance(month); //Se vuelve a calcular el balance de todos los meses
+}
+/* ---------------------- */
+
+/* Al crear un nuevo Inoutcome */
+const newIo = io => {
+    const ioMonth = document.querySelector(`.${io.month}`); //El contenedor segun el mes de los inoutcomes
+    ioMonth.appendChild(ioFuncs.createIoHtml(io));
+    onChangeOfArr(io.month);
+}
+/* --------------------------- */
+
+/* Cargar los inoutcomes del local storage */
+const loadIos = () => {for (let io of global.iosArr) newIo(io)};
+/* --------------------------------------- */
 
 /* Funcion a ejecutar para cuando el anio termine */
 const whenYearEnds = () => {
@@ -199,6 +252,23 @@ const whenYearEnds = () => {
 }
 /* ---------------------------------------------- */
 
+
+/* Funcion para eliminar un archivo de un arreglo de archivos */
+const removeFileFromFiles = (filesArr, fileIndx) => filesArr.splice(fileIndx, 1);
+/* ---------------------------------------------------------- */
+
+/* Funcion para obtener el indice del archivo a eliminar y eliminarlo */
+const deleteFileFromIo = (io, fileName) => {
+    //Por cada archivo del io que contiene el archivo a eliminar
+    io.files.forEach((file, indx) => {
+        //Si el archivo es el archivo a eliminar
+        if (file.name === fileName) removeFileFromFiles(io.files, indx); //Se elimina el archivo de los archivos
+    });
+    //Despues de eliminar el archivo
+    onChangeOfArr(io.month); //Se almacena el nuevo io con el archivo eliminado donde corresponde
+}
+/* ------------------------------------------------------------------ */
+
 /* Cuando cargue el DOM */
 window.onload = () => {
     //Si se esta visualizando el anio actual
@@ -208,4 +278,4 @@ window.onload = () => {
 };
 /* -------------------- */
 
-export { saveIoArrOnLS, newIo, loadIos, shwEditFrm, editIo, deleteIo, deleteAllIos, getIoFromArr, getIoIndxFromArr, showDocsPrev, loadDocsViewer, whenYearEnds };
+export { saveIoArrOnLS, newIo, loadIos, shwEditFrm, editIo, deleteIo, deleteAllIos, getIoFromArr, getIoIndxFromArr, showDocsPrev, loadDocsViewer, whenYearEnds, deleteFileFromIo };

@@ -141,9 +141,9 @@ const searchOnIos = (keyWord) => {
 /* -------------------------------------- */
 
 /* Funcion para identificar cuando se alcance el maximo de informacion para el input file */
-const maxFileSizeReached = () => {
+const maxFileSizeReached = (inptFiles) => {
     let totSize = 0;
-    for (let file of global.frmAdd.inptFile.files) totSize += file.size;
+    for (let file of inptFiles) totSize += file.size;
     const maxAllowedSize = 1.5 * 1024 * 1024; //1.5MB
     return totSize > maxAllowedSize ? true : false;
 }

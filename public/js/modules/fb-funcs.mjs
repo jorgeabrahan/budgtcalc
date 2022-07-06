@@ -17,6 +17,19 @@ const mergeArrWithLSArr = arrFromFb => {
 }
 /* ----------------------------------------------------------------------------------------------- */
 
+/* Funcion para eliminar un solo archivo del storage */
+const deleteFileFromStorage = async (io, fileName, funcToExeAfter) => {
+    const refToDelete = fbImports.ref(fbImports.fbStorage, `/images/${global.userLoged.uid}/${global.yearToLoad}/${io.id}/${fileName}`);
+    await fbImports.deleteObject(refToDelete)
+        .then(() => {
+            //Despues de eliminar el archivo si no hubo error
+            funcToExeAfter(io, fileName);
+        })
+        .catch(() => {
+            modal.shwModal('Error al eliminar archivo', `Se dio un error al eliminar el archivo ${fileName} de la base de datos, recargue la pagina y compruebe si el archivo se elimino, si no, puede intentar de nuevo mas tarde.`);
+        });
+}
+
 /* Funcion para eliminar archivo del storage */
 const deleteFilesFromStorage = async (io) => {
     for (let file of io.files) {
@@ -29,7 +42,9 @@ const deleteFilesFromStorage = async (io) => {
 /* ----------------------------------------- */
 
 /* Funcion para obtener el enlace de las imagenes en el storage */
-const getSrcFilesFromStorage = (io) => {
+const getSrcFilesFromStorage = (io, funcToDoAfterGettingFiles) => {
+    io.files = []; //Se vacia el arreglo de los arcchivos del io
+    
     const listRef = fbImports.ref(fbImports.fbStorage, `/images/${global.userLoged.uid}/${global.yearToLoad}/${io.id}`);
     fbImports.listAll(listRef).then((res) => {
         res.items.forEach(async (doc, indx, arr) => {
@@ -42,10 +57,7 @@ const getSrcFilesFromStorage = (io) => {
                     src
                 });
                 //Cuando ya se hayan obtenido todos los archivos del storage
-                if (io.files.length === arr.length) {
-                    global.iosArr.push(io); //Se guarda el io en el arreglo
-                    dbFuncs.newIo(io); //Se crea el io en la interfaz
-                }
+                if (io.files.length === arr.length) funcToDoAfterGettingFiles(io);
             }).catch(() => {
                 modal.shwModal('Error al obtener archivo', `El archivo ${doc.name} se almaceno correctamente en la base de datos pero ocurrio un problema al tratar de acceder a el.`);
                 return;
@@ -93,7 +105,9 @@ const getDataFromFb = (uid, year) => {
 
 /* Funcion para eliminar todo el contenido del anio tanto de la interfaz como del arreglo en el almacenamiento local y la base de datos */
 const deleteYear = async () => {
+    //Se quitan los eventos del modal
     modalCnt.style.pointerEvents = 'none';
+    
     for (let io of global.iosArr) { //Para cada io del anio 
         document.getElementById(io.id).remove(); //Se elimina el elemento de la interfaz
         if (global.userLoged && io.files.length > 0) await deleteFilesFromStorage(io); //Se eliminan los archivos de la base de datos
@@ -121,4 +135,4 @@ const deleteYear = async () => {
 }
 /* ------------------------------------------------------------------------------------------------------------------------------------ */
 
-export { mergeArrWithLSArr, deleteFilesFromStorage, getSrcFilesFromStorage, saveIoFilesOnStorage, saveOnFb, getDataFromFb, deleteYear };
+export { mergeArrWithLSArr, deleteFileFromStorage, deleteFilesFromStorage, getSrcFilesFromStorage, saveIoFilesOnStorage, saveOnFb, getDataFromFb, deleteYear };

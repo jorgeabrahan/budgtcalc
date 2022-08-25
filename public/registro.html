@@ -15,6 +15,8 @@
     <!-- ----------------- -->
     <!-- Enlace de la imagen del icono de la app -->
     <link rel="icon" href="./img/budgcalc.png">
+
+    <script src="https://www.paypal.com/sdk/js?client-id=ARlVoIZ9Sc41uoOaHAXkpNSauCXFoxZxxSCTXCw2qlZkRs7NHYKXuaUHqvGdC8Cq3y8DTmo3Khdyxb_p&components=buttons&currency=USD"></script>
 </head>
 <body class="dark">
     <!-- Cabecera para mostrar un input para cambiar el tema de la app -->
@@ -32,7 +34,57 @@
         </div>
     </header>
     <!-- ------------------------------------------------------------- -->
-    <p>Se esta trabajando en los metodos de pago para registrarse</p>
+
+    <main>
+        <div class="container register-container">
+            <form class="form form-register" id="frmRegister">
+                <div class="form__group">
+                    <label class="form__label" for="inptEmail">Ingresa tu correo electronico:</label>
+                    <input class="form__input" id="inptEmail" type="email" placeholder="Ej.: tucorreo@gmail.com" onclick="select()" spellcheck="false" autocomplete="off">
+                </div>
+                <div class="form__group">
+                    <label class="form__label" for="inptPass">Ingresa tu contraseña:</label>
+                    <input class="form__input" id="inptPass" type="password" placeholder="Ej.: j8YbbFG5512" onclick="select()" spellcheck="false" autocomplete="off">
+                </div>
+                <div class="form__group">
+                    <label class="form__label" for="inptPassConfirm">Confirma tu contraseña:</label>
+                    <input class="form__input" id="inptPassConfirm" type="password" placeholder="Ej.: j8YbbFG5512" onclick="select()" spellcheck="false" autocomplete="off">
+                </div>
+                <div class="form__group">
+                    <p class="form__msg" id="frmRegisterMsg"></p>
+                    <input type="submit" value="Registrarse" class="form__button">
+                </div>
+            </form>
+            
+            <div class="benefits">
+                <p><span class="benefits__price">$ 4.99</span> <span class="benefits__period">/ al mes</span></p>
+                <h2 class="benefits__title">
+                    Beneficios al crear tu cuenta:
+                </h2>
+                <ul class="benefits__list">
+                    <li>Acceso a tu balance financiero desde cualquier dispositivo.</li>
+                    <li>Mantener un balance financiero de el año actual y anteriores.</li>
+                    <li>Tablero con todos los años en los que tienes un presupuesto.</li>
+                    <li>Boton para crear presupuestos en años anteriores.</li>
+                    <li>Opcion para agregar un monto que se repite.</li>
+                    <li>Opcion para agregar archivos en los montos (facturas, recibos, etc).</li>
+                    <li>Visualizador de archivos incorporado para computadoras.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    
+    <div class="modal-cnt modal-cnt--register d-none" id="modalCnt">
+        <div class="modal register-container--modal">
+            <div class="form__group--icon">
+                <span class="material-icons form__icon-close" onclick="this.parentElement.parentElement.parentElement.classList.add('d-none')">
+                    close
+                </span>
+            </div>
+            <div id="paypal-buttons" class="paypal-buttons"></div>
+            <p class="form__msg" id="modalPaymentMsg"></p>
+        </div>
+    </div>
 </body>
 <script src="./js/register.js" type="module" defer></script>
 </html>

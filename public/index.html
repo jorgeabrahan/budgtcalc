@@ -5,6 +5,23 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="JorgeSA">
+    <meta name="copyright" content="JorgeSA">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="Lleva un control de tus ingresos y egresos y gestiona tu balance financiero con budgtcalc. Es una herramienta facil de utilizar y es muy util.">
+    <meta name="keywords" content="finanzas, ingresos, egresos, balance financiero, presupuesto, gastos, gestion financiera">
+    <meta name="og:type" content="website">
+    <meta name="og:title" content="Calculo de presupuesto">
+    <meta name="og:url" content="https://budgtcalc.web.app">
+    <meta name="og:image" content="https://budgtcalc.web.app/img/og-image.jpg">
+    <meta name="og:description" content="Lleva un control de tus ingresos y egresos y gestiona tu balance financiero con budgtcalc. Es una herramienta facil de utilizar y es muy util.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Calculo de presupuesto">
+    <meta name="twitter:description" content="Lleva un control de tus ingresos y egresos y gestiona tu balance financiero con budgtcalc. Es una herramienta facil de utilizar y es muy util.">
+    <meta name="twitter:image" content="https://budgtcalc.web.app/img/og-image.jpg">
+    <meta name="twitter:image:alt" content="Calculo de presupuesto">
+    <link rel="canonical" href="https://budgtcalc.web.app/">
+    
     <title>Calculo de presupuesto</title>
     
     <!-- Enlace de los iconos utilizados de la app -->
@@ -82,7 +99,7 @@
         <form class="form formadd" id="frmAdd">
             <div class="form__group">
                 <label for="inptType" class="form__label">
-                    Seleccione el tipo:
+                    * Seleccione el tipo de monto:
                 </label>
                 <select class="form__input" name="inptType" id="inptType">
                     <option value="ingreso" selected>Ingreso</option>
@@ -91,35 +108,35 @@
             </div>
             <div class="form__group">
                 <label for="inptId" class="form__label">
-                    Identificador:
+                    * Identificador:
                 </label>
                 <input type="text" class="form__input" id="inptId" name="inptId" maxlength="33"
-                    placeholder="Ej.: Pago del agua" onclick="select()" autofocus spellcheck="false" autocomplete="off" >
+                    placeholder="Agregue el titulo del monto" autofocus spellcheck="false" autocomplete="off" >
             </div>
             <div class="form__group">
                 <label for="inptDesc" class="form__label">
-                    Descripcion:
+                    * Descripcion:
                 </label>
-                <textarea class="form__input" name="inptDesc" id="inptDesc" maxlength="150"
-                    placeholder="Ej.: Pago realizado 5 dias antes de la fecha limite" onclick="select()" spellcheck="false" autocomplete="off"
+                <textarea class="form__input form__input--description" name="inptDesc" id="inptDesc" maxlength="150"
+                    placeholder="Agregue una descripcion del monto" spellcheck="false" autocomplete="off"
                     ></textarea>
             </div>
             <div class="form__group">
                 <label for="inptAmount" class="form__label">
-                    Monto:
+                    * Monto:
                 </label>
                 <input class="form__input" type="number" name="inptAmount" id="inptAmount"
-                    min="1" placeholder="2500" onclick="select()" spellcheck="false" autocomplete="off" >
+                    min="1" placeholder="Agregue la cantidad sin comas" onclick="select()" spellcheck="false" autocomplete="off" >
             </div>
             <div class="form__group">
                 <label for="inptDate" class="form__label">
-                    Fecha del monto:
+                    * Fecha del monto:
                 </label>
                 <input class="form__input" type="date" name="inptDate" id="inptDate" >
             </div>
             <div class="form__group d-none">
                 <label for="inptRepeat" class="form__label">
-                    Repetir cada:
+                    Cada cuantos meses se repite:
                 </label>
                 <select class="form__input" name="inptRepeat" id="inptRepeat" required>
                     <option value="nunca" selected>Nunca</option>
@@ -133,12 +150,13 @@
             </div>
             <div class="form__group d-none">
                 <label for="inptFile" class="form__label">
-                    Sube una factura u otro archivo como imagen o pdf (Opcional):
+                    Sube una factura u otro archivo (img / pdf):
                 </label>
                 <input class="form__input" type="file" multiple accept="image/*, .pdf" name="inptFile" id="inptFile">
             </div>
             <div class="form__group">
                 <p class="form__msg" id="frmAddMsg">
+                    Campos con "*" son obligatorios
                 </p>
                 <input type="submit" value="Agregar" class="form__button">
             </div>
@@ -206,7 +224,7 @@
                 <div class="form__group">
                     <input class="filter__input" type="search" name="inptFltrSrch" id="inptFltrSrch"
                         placeholder="Ej.: agua" autocomplete="off">
-                        <button class="form__button"><span class="material-icons">search</span></button>
+                        <button class="form__button form__button--search"><span class="material-icons">search</span></button>
                 </div>
             </form>
         </div>
@@ -671,7 +689,9 @@
     <div class="popup d-none">
         <form class="form formedit" id="frmEdit" spellcheck="false" autocomplete="false">
             <div class="form__group--icon">
-                <span class="material-icons form__icon-close" onclick="this.parentElement.parentElement.parentElement.classList.add('d-none')">close</span>
+                <span class="material-icons form__icon-close" onclick="this.parentElement.parentElement.parentElement.classList.add('d-none')">
+                    close
+                </span>
             </div>
             <div class="form__group">
                 <label for="inptNewType" class="form__label">
@@ -687,21 +707,21 @@
                     Nuevo identificador:
                 </label>
                 <input type="text" class="form__input" id="inptNewId" name="inptNewId"
-                    maxlength="33" onclick="select()" required>
+                    maxlength="33" required>
             </div>
             <div class="form__group">
                 <label for="inptNewDesc" class="form__label">
                     Nueva descripcion:
                 </label>
                 <textarea class="form__input" name="inptNewDesc" id="inptNewDesc"
-                    maxlength="115" onclick="select()" required></textarea>
+                    maxlength="115" required></textarea>
             </div>
             <div class="form__group">
                 <label for="inptNewAmount" class="form__label">
                     Nuevo monto:
                 </label>
                 <input class="form__input" type="number" name="inptNewAmount" id="inptNewAmount"
-                    min="1" onclick="select()" required>
+                    min="1" required>
             </div>
             <div class="form__group d-none">
                 <label for="inptAddFiles" class="form__label">
@@ -758,7 +778,7 @@
                 </p>
                 <input type="submit" value="Iniciar sesión" class="form__button">
             </div>
-            <a class="form__link" href="registro.html">Registrate</a>
+            <!-- <a class="form__link" href="registro.html">Registrate</a> -->
         </form>
     </div>
     <!-- ------------------------------------------ -->
@@ -767,7 +787,9 @@
     <div class="modal-cnt d-none" id="modalCnt">
         <div class="modal">
             <div class="form__group--icon">
-                <span class="material-icons form__icon-close" onclick="this.parentElement.parentElement.parentElement.classList.add('d-none')">close</span>
+                <span class="material-icons form__icon-close" onclick="this.parentElement.parentElement.parentElement.classList.add('d-none')">
+                    close
+                </span>
             </div>
             <div class="modal__info" id="modalInfo">
             </div>

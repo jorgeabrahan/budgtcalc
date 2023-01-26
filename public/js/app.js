@@ -102,6 +102,7 @@ global.frmAdd.addEventListener("submit", async (e) => {
     global.frmAdd.inptFile.parentElement.classList.remove("d-none");
 
     e.target.style.pointerEvents = "all"; //Se vuelven a poner los eventos al formulario
+    global.frmAdd.inptId.focus();
 });
 /* ----------------------- */
 
@@ -152,6 +153,7 @@ global.frmEdit.addEventListener("submit", async (e) => {
     }
 
     createIoEdited(prevIoData);
+    global.frmEdit.parentElement.classList.add("d-none"); //Se oculta el formulario
 });
 
 /* Al agregar un nuevo presupuesto */

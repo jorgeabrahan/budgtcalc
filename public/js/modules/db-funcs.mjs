@@ -35,10 +35,24 @@ const getIoFromArr = (id) => global.iosArr.find((io) => io.id === id);
 const getIoIndxFromArr = (id) => global.iosArr.findIndex((io) => io.id === id);
 /* ----------------------- */
 const removeIoFromArr = (indx) => global.iosArr.splice(indx, 1);
-const onChangeOfArr = (month) => {
+const onChangeOfArr = (month, showModal = false) => {
     saveIoArrOnLS();
     //Si el usuario inicio sesion
-    if (global.userLoged) fbFuncs.saveOnFb(global.iosArr, global.yearToLoad); //Se almacena el array en firebase tambien
+    if (global.userLoged) {
+        //Se almacena el array en firebase tambien
+        fbFuncs
+            .saveOnFb(global.iosArr, global.yearToLoad)
+            .then(() => {
+                if (showModal) modal.shwModal("Almacenar cambios", "Cambios efectuados exitosamente y almacenados en la base de datos");
+            })
+            .catch((err) => {
+                modal.shwModal(
+                    "Error al almacenar cambios",
+                    "Ocurrio un error al intentar almacenar los cambios en la base de datos, porfavor intenta de nuevo mas tarde"
+                );
+                console.error(err);
+            });
+    }
     ioFuncs.calcMonthBalance(month);
 };
 
@@ -211,15 +225,18 @@ const shwEditFrm = (io) => {
 /* ------------------------------------ */
 
 /* Al eliminar un inoutcome */
-const deleteIo = (id, delJustFromUI) => {
+const deleteIo = (id, delJustFromUI, showModal = false) => {
+    if (showModal) modal.shwModal("Eliminando...", "Espere mientras se elimina el monto de la interfaz.");
     const io = getIoFromArr(id);
     document.getElementById(id).remove(); //Se elimina el elemento de la interfaz
+    if (showModal) modal.shwModal("Eliminado", "Monto eliminado de la interfaz exitosamente");
     if (!delJustFromUI) {
+        if (showModal) modal.shwModal("Eliminando...", "Espere mientras se elimina el monto de la base de datos.");
         //Si ademas de eliminarlo de la interfaz se quiere eliminar en el arreglo
         removeIoFromArr(getIoIndxFromArr(id)); //Se elimina del arreglo
         //Si tiene la sesion iniciada y el io tenia archivos
         if (global.userLoged && io.files.length > 0) fbFuncs.deleteFilesFromStorage(io); //Se eliminan los archivos de la base de datos
-        onChangeOfArr(io.month);
+        onChangeOfArr(io.month, true);
     }
 };
 /* ----------------------- */

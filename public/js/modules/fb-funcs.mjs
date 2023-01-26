@@ -45,12 +45,7 @@ const deleteFilesFromStorage = async (io) => {
             FIREBASE.FBSTORAGE,
             `/images/${global.userLoged.uid}/${global.yearToLoad}/${io.id}/${file.name}`
         );
-        await FIREBASE.storageFuncs.deleteObject(refToDelete).catch(() => {
-            modal.shwModal(
-                "Error al eliminar archivo",
-                `Se dio un error al eliminar el archivo ${file.name} de la base de datos, intente de nuevo mas tarde.`
-            );
-        });
+        await FIREBASE.storageFuncs.deleteObject(refToDelete);
     }
 };
 /* ----------------------------------------- */
@@ -59,7 +54,10 @@ const deleteFilesFromStorage = async (io) => {
 const getSrcFilesFromStorage = (io, funcToDoAfterGettingFiles) => {
     io.files = []; //Se vacia el arreglo de los arcchivos del io
 
-    const listRef = FIREBASE.storageFuncs.ref(FIREBASE.FBSTORAGE, `/images/${global.userLoged.uid}/${global.yearToLoad}/${io.id}`);
+    const listRef = FIREBASE.storageFuncs.ref(
+        FIREBASE.FBSTORAGE,
+        `/images/${global.userLoged.uid}/${global.yearToLoad}/${io.id}`
+    );
     FIREBASE.storageFuncs
         .listAll(listRef)
         .then((res) => {
@@ -118,14 +116,23 @@ const saveIoFilesOnStorage = (ioId, files) => {
 /* ------------------------------------------------- */
 
 const saveOnFb = (arrToSave, yearToSave) => {
-    FIREBASE.firestoreFuncs
-        .setDoc(FIREBASE.firestoreFuncs.doc(FIREBASE.FBDB, global.userLoged.uid, yearToSave), { data: [...arrToSave] })
-        .catch(() => {
-            modal.shwModal(
-                "Error al subir monto",
-                `Ocurrio un error al subir el monto que acabas de ingresar a la base de datos, porfavor intenta de nuevo mas tarde.`
-            );
-        });
+    return new Promise((resolve, reject) => {
+        FIREBASE.firestoreFuncs
+            .setDoc(FIREBASE.firestoreFuncs.doc(FIREBASE.FBDB, global.userLoged.uid, yearToSave), {
+                data: [...arrToSave],
+            })
+            .then(() => {
+                resolve("Base de datos actualizada");
+            })
+            .catch((err) => {
+                modal.shwModal(
+                    "Error al guardar en base de datos",
+                    `Ocurrio un error al intentar guardar los cambios en la base de datos, porfavor intenta de nuevo mas tarde.`
+                );
+                console.error(err);
+                reject(err);
+            });
+    });
 };
 
 /* Se obtiene la informacion para el año actual de la base de datos */

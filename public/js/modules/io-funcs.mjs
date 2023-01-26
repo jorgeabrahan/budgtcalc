@@ -2,6 +2,7 @@
 import * as global from "./global.mjs";
 import * as dbFuncs from "./db-funcs.mjs";
 import * as fbFuncs from "./fb-funcs.mjs";
+import * as modal from "./modal.mjs";
 import { prevTheme } from "./theme.mjs";
 
 /* Calcular el balance financiero del año (ingresos, egresos y presupuesto) */
@@ -75,7 +76,11 @@ const createIoHtml = (ioObj) => {
             ${global.currFrmt.format(ioObj.amount)}
         </p>
         <div class="income__buttons">
-            ${ioObj.files.length > 0 ? '<button class="file-btn"><span class="material-icons">description</span></button>' : ""}
+            ${
+                ioObj.files.length > 0
+                    ? '<button class="file-btn"><span class="material-icons">description</span></button>'
+                    : ""
+            }
             <button class="edit-btn"><span class="material-icons">edit</span></button>
             <button class="delete-btn"><span class="material-icons">delete</span></button>
         </div>
@@ -99,9 +104,17 @@ const createIoHtml = (ioObj) => {
     `;
 
     ioObj.files.length &&
-        inoutcomeCnt.querySelector(".file-btn").addEventListener("click", () => dbFuncs.showDocsPrev(dbFuncs.getIoFromArr(ioObj.id))); //Si tiene archivos
-    inoutcomeCnt.querySelector(".edit-btn").addEventListener("click", () => dbFuncs.shwEditFrm(dbFuncs.getIoFromArr(ioObj.id))); //Evento para eliminar inoutcome
-    inoutcomeCnt.querySelector(".delete-btn").addEventListener("click", () => dbFuncs.deleteIo(ioObj.id, false)); //Evento para eliminar inoutcome de la interfaz y del arreglo
+        inoutcomeCnt
+            .querySelector(".file-btn")
+            .addEventListener("click", () => dbFuncs.showDocsPrev(dbFuncs.getIoFromArr(ioObj.id))); //Si tiene archivos
+    inoutcomeCnt
+        .querySelector(".edit-btn")
+        .addEventListener("click", () => dbFuncs.shwEditFrm(dbFuncs.getIoFromArr(ioObj.id))); //Evento para editar inoutcome
+    inoutcomeCnt.querySelector(".delete-btn").addEventListener("click", () => {
+        if (confirm("¿Seguro que desea eliminar este monto?")) {
+            dbFuncs.deleteIo(ioObj.id, false, true);
+        }
+    }); //Evento para eliminar inoutcome de la interfaz y del arreglo
     return inoutcomeCnt;
 };
 /* ---------------------------- */
